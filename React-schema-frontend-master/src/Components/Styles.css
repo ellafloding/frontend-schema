@@ -1,0 +1,95 @@
+.Header{
+    background-color: midnightblue;
+    color: white;
+}
+
+.dropDown{
+    border-width: 2px;
+    border-color: midnightblue;
+    margin-right: 50px;
+    margin-bottom: 50px;
+}
+
+.container{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 100px;
+}
+
+.button{
+    background-color: midnightblue;
+    color: white;
+    border: 2px solid midnightblue;
+    border-radius: 5px;
+    margin-right: 20px;
+}
+
+.table{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 auto;
+    margin-top: 80px;
+}
+  
+th, td {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+}
+  
+th {
+    background-color: #f2f2f2;
+}
+
+.save{
+    border: 2px solid midnightblue;
+    border-radius: 5px;
+    position: absolute;
+    right: 0;
+    margin-right: 50px;
+    width: 300px;
+    height: 80px;
+}
+
+.save-button{
+    background-color: midnightblue;
+    color: white;
+    border: 2px solid midnightblue;
+    border-radius: 5px;
+    margin-left: 80px;
+  }
+
+  .save-form{
+    margin: 5px;
+  }
+
+  .save-header{
+    margin-left: 180px;
+    font-size:small;
+    font-weight: bold;
+    
+  }
+
+  .datepicker-input-container {
+    margin-right: 600px;
+    z-index:0;
+}
+
+.react-datepicker-popper {
+    z-index: 1;
+}
+
+.date-picker-container {
+    display: flex;
+    align-items: center;
+    padding-right: 1000px;
+}
+
+.custom-datepicker {
+    font-family: 'Arial', sans-serif;
+    border: 2px solid midnightblue;
+    border-radius: 4px;
+    padding: 8px;
+    margin-right: 2px;
+  }
+
