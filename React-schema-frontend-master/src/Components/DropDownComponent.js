@@ -20,8 +20,19 @@ const DropDownComponent = () => {
     const [omdomeLista, setOmdomeLista] = useState('');
     const [studentLista, setStudentLista] = useState([]);
     const [combinedLista, setCombinedLista] = useState([]);
-    const [selectedBetyg, setSelectedBetyg] = useState('');
-    const [selectedOption, setSelectedOption] = useState('');
+    const [selectedBetyg, setSelectedBetyg] = useState([]);
+    const [selectedOption, setSelectedOption] = useState([]);
+
+
+    const [activity, setActivity] = useState('');
+    const [location, setLocation] = useState('');
+    const [teacher, setTeacher] = useState('');
+    const [comment, setComment] = useState('');
+    const [meetingLink, setMeetingLink] = useState('');
+    const [course, setCourse] = useState('');
+    const [campus, setCampus] = useState('');
+
+
 
     const [selectedDate, setSelectedDate] = useState(null);
     const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
@@ -288,11 +299,52 @@ const DropDownComponent = () => {
     let saveData = []
     let updateData = []
 
+    const getBearerToken = () =>{
+        const bearer = 'Bearer ' + '3755~ibTv6HTwA02LPjard6bpFngTsfYw3ZKKU4PeJlionVo2hr5lL4lv0hjrE44NED5g'
+        return bearer
+    }
     const handleSave = () => {
         for(let i = 0; i<combinedLista.length; i++){
+
             if(combinedLista[i].selected === true){
 
-                if (combinedLista[i].ladokID !== null) {
+                let yearStart = combinedLista[i].startdate.toString().split('-').slice(0,1)
+                console.log(yearStart)
+                let monthStart = combinedLista[i].startdate.toString().split('-').slice(1,2)
+                console.log(monthStart)
+                let dayStart = combinedLista[i].startdate.toString().split('-').slice(2,3)
+                console.log(dayStart)
+
+                let startHour = combinedLista[i].starttime.toString().split(':').slice(0,1)
+                let startMinute = combinedLista[i].starttime.toString().split(':').slice(1,0)
+                let startMillisecond = "00"
+
+                let yearEnd = combinedLista[i].enddate.toString().split('-').slice(0,1)
+                console.log(yearEnd)
+                let monthEnd = combinedLista[i].enddate.toString().split('-').slice(1,2)
+                console.log(monthEnd)
+                let dayEnd = combinedLista[i].enddate.toString().split('-').slice(2,3)
+                console.log(dayEnd)
+
+                let endHour = combinedLista[i].endtime.toString().split(':').slice(0,1)
+                let endMinute = combinedLista[i].endtime.toString().split(':').slice(1,0)
+                let endMillisecond = "00"
+
+                //Kanske är något fel med datum formatet
+                let dateStart = new Date(yearStart,monthStart,dayStart, startHour, startMinute, startMillisecond)
+                let dateEnd = new Date(yearEnd, monthEnd, dayEnd, endHour, endMinute, endMillisecond)
+                console.log(dateEnd)
+                console.log(dateStart)
+
+                const entry = {
+                    title: activity,
+                    startTime: dateStart,
+                    endTime: dateEnd,
+                    location: location,
+                }
+                saveData.push(entry);
+
+               /* if (combinedLista[i].ladokID !== null) {
                     const entry = {
                         ladokID: combinedLista[i].ladokID,
                         personnr: combinedLista[i].personnummer,
@@ -313,28 +365,31 @@ const DropDownComponent = () => {
                         betygStatus: selectedOption
                     }
                     updateData.push(entry);
-                }
+                }*/
+
+
             }
         }
+
 
         const bodyFormData = new FormData();
 
         saveData.forEach((item) => {
-            bodyFormData.append("personnr", item.personnummer);
-            bodyFormData.append("kurskod", item.kurskod);
-            bodyFormData.append("modul", item.modul);
-            bodyFormData.append("datum", item.datum);
-            bodyFormData.append("betyg", item.betyg);
-            bodyFormData.append("betygStatus", item.betyg_status);
+            bodyFormData.append('calendar_event[context_code]', 'user_126754');
+            bodyFormData.append('calendar_event[title]', item.title);
+            bodyFormData.append('calendar_event[start_at]', item.startTime);
+            bodyFormData.append('calendar_event[end_at]', item.endTime);
         });
 
         let JSONData = JSON.stringify(saveData)
 
 
-       fetch("http://localhost:8080/api/v1/editladok",{
+       fetch("https://ltu.instructure.com/api/v1/calendar_events.json",{
             method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body: JSONData
+           withCredentials: true,
+           credentials: 'include',
+        headers:{"Content-Type":"multipart/form-data", Authorization: getBearerToken(), mode: 'cors', origin: 'http://localhost:3000', host: 'ltu.instructure.com'},
+            body: bodyFormData
         }).then(() =>{
             console.log("New entry added!")
         })
@@ -401,17 +456,24 @@ const DropDownComponent = () => {
                             onChange={() => handleCheckboxChange(index)}
                         />
                     </td>
-                    <td>{item.activity}</td>
+                    <td> <input defaultValue={item.activity} onChange={(e) => setActivity(e.target.value)}>
+                    </input> </td>
                     <td>{item.startdate}</td>
                     <td>{item.starttime}</td>
                     <td>{item.enddate}</td>
                     <td>{item.endtime}</td>
-                    <td>{item.location}</td>
-                    <td>{item.teacher}</td>
-                    <td>{item.comment}</td>
-                    <td>{item.meetingLink}</td>
-                    <td>{item.course}</td>
-                    <td>{item.campus}</td>
+                    <td> <input defaultValue={item.location} onChange={(e) => setLocation(e.target.value)}>
+                    </input></td>
+                    <td><input defaultValue={item.teacher} onChange={(e) => setTeacher(e.target.value)}>
+                    </input></td>
+                    <td><input defaultValue={item.comment} onChange={(e) => setComment(e.target.value)}>
+                    </input></td>
+                    <td><input defaultValue={item.meetingLink} onChange={(e) => setMeetingLink(e.target.value)}>
+                    </input></td>
+                    <td><input defaultValue={item.course} onChange={(e) => setCourse(e.target.value)}>
+                    </input></td>
+                    <td><input defaultValue={item.campus} onChange={(e) => setCampus(e.target.value)}>
+                    </input></td>
 
 
                 </tr>
