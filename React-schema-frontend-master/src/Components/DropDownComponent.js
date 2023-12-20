@@ -1,13 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import axios from 'axios';
-
-
 
 import 'react-datepicker/dist/react-datepicker.css';
 
 import DatePicker from "react-datepicker";
-
-
+import axios from "axios";
 
 const DropDownComponent = () => {
     const [kurskodOptions, setKurskodOptions] = useState([]);
@@ -337,10 +333,10 @@ const DropDownComponent = () => {
                 console.log(dateStart)
 
                 const entry = {
-                    title: activity,
-                    startTime: dateStart,
-                    endTime: dateEnd,
-                    location: location,
+                    title: 'activity',
+                    startTime: '2022-11-22T10:15:00Z',
+                    endTime: '2022-11-22T11:45:00Z',
+                    location: 'location',
                 }
                 saveData.push(entry);
 
@@ -381,10 +377,68 @@ const DropDownComponent = () => {
             bodyFormData.append('calendar_event[end_at]', item.endTime);
         });
 
-        let JSONData = JSON.stringify(saveData)
+        /*const myHeaders = new Headers();
+        myHeaders.append("Authorization", "Bearer 3755~ibTv6HTwA02LPjard6bpFngTsfYw3ZKKU4PeJlionVo2hr5lL4lv0hjrE44NED5g");
+        myHeaders.append("Access-Control-Allow-Origin", "*");
+        myHeaders.append("Access-Control-Allow-Methods", "POST");
+        myHeaders.append("Access-Control-Allow-Headers", "*")
+*/
+
+        const formdata = new FormData();
+        formdata.append("calendar_event[context_code]", "user_126754");
+        formdata.append("calendar_event[title]", "API Test!");
+        formdata.append("calendar_event[start_at]", "2022-11-22T10:15:00Z");
+        formdata.append("calendar_event[end_at]", "2022-11-22T11:45:00Z");
+
+        let JSONData = JSON.stringify(formdata)
+/*
+        const requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: JSONData,
+            redirect: 'follow'
+        };
 
 
-       fetch("https://ltu.instructure.com/api/v1/calendar_events.json",{
+        fetch("http://localhost:8080/apiproxy", requestOptions)
+            .then(response => response.text())
+            .then(result => console.log(result))
+            .catch(error => console.log('error', error));*/
+
+        const myHeaders = new Headers();
+        myHeaders.append("Content-Type", "application/json");
+        /*myHeaders.append("Access-Control-Allow-Origin", "*");
+        myHeaders.append("Access-Control-Allow-Methods", "POST");
+        myHeaders.append("Access-Control-Allow-Headers", "*")*/
+
+        const raw ={
+            "contextCode": "user_126754",
+            "startAt": "2022-11-25T10:15:00Z",
+            "endAt": "2022-11-25T11:45:00Z",
+            "title": "API Test!",
+        };
+
+        const requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: JSON.stringify(raw),
+            redirect: 'follow'
+        };
+
+        fetch("http://localhost:8080/apiproxy/test", requestOptions)
+            .then(response => response.text())
+            .then(result => console.log(result))
+            .catch(error => console.log('error', error));
+
+        console.log(raw)
+
+       /* const rawNew = raw.slice(1,raw.length-1);
+        console.log(rawNew);
+        const arr = rawNew.split(",");
+        console.log(arr);
+        const newArr = arr[0].split(":");
+        console.log(newArr[0].substring(1, newArr[0].length-1))*/
+       /*fetch("https://ltu.instructure.com/api/v1/calendar_events.json",{
             method:"POST",
            withCredentials: true,
            credentials: 'include',
@@ -394,7 +448,7 @@ const DropDownComponent = () => {
             console.log("New entry added!")
         })
         windowPop()
-        document.location.reload()
+        document.location.reload()*/
         
     }
 
