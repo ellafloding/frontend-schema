@@ -311,8 +311,13 @@ const DropDownComponent = () => {
                 let dayStart = combinedLista[i].startdate.toString().split('-').slice(2,3)
                 console.log(dayStart)
 
+                console.log(combinedLista[i].starttime)
+                console.log(combinedLista[i].endtime)
+
                 let startHour = combinedLista[i].starttime.toString().split(':').slice(0,1)
-                let startMinute = combinedLista[i].starttime.toString().split(':').slice(1,0)
+                console.log(startHour)
+                let startMinute = combinedLista[i].starttime.toString().split(':').slice(1,2)
+                console.log(startMinute)
                 let startMillisecond = "00"
 
                 let yearEnd = combinedLista[i].enddate.toString().split('-').slice(0,1)
@@ -323,20 +328,25 @@ const DropDownComponent = () => {
                 console.log(dayEnd)
 
                 let endHour = combinedLista[i].endtime.toString().split(':').slice(0,1)
-                let endMinute = combinedLista[i].endtime.toString().split(':').slice(1,0)
+                let endMinute = combinedLista[i].endtime.toString().split(':').slice(1,2)
+                console.log(endMinute)
                 let endMillisecond = "00"
 
+                let iso = combinedLista[i].startdate.toLocaleString()
+
+                console.log(iso)
+
                 //Kanske är något fel med datum formatet
-                let dateStart = new Date(yearStart,monthStart,dayStart, startHour, startMinute, startMillisecond)
-                let dateEnd = new Date(yearEnd, monthEnd, dayEnd, endHour, endMinute, endMillisecond)
+                let dateStart = new Date(yearStart,monthStart,dayStart, startHour, startMinute, startMillisecond).toLocaleString()
+                let dateEnd = new Date(yearEnd, monthEnd, dayEnd, endHour, endMinute, endMillisecond).toLocaleString()
                 console.log(dateEnd)
                 console.log(dateStart)
 
+
                 const entry = {
-                    title: 'activity',
-                    startTime: '2022-11-22T10:15:00Z',
-                    endTime: '2022-11-22T11:45:00Z',
-                    location: 'location',
+                    title: activity,
+                    startTime: dateStart,
+                    endTime: dateEnd,
                 }
                 saveData.push(entry);
 
@@ -363,19 +373,12 @@ const DropDownComponent = () => {
                     updateData.push(entry);
                 }*/
 
-
+                console.log(saveData)
             }
         }
 
 
         const bodyFormData = new FormData();
-
-        saveData.forEach((item) => {
-            bodyFormData.append('calendar_event[context_code]', 'user_126754');
-            bodyFormData.append('calendar_event[title]', item.title);
-            bodyFormData.append('calendar_event[start_at]', item.startTime);
-            bodyFormData.append('calendar_event[end_at]', item.endTime);
-        });
 
         /*const myHeaders = new Headers();
         myHeaders.append("Authorization", "Bearer 3755~ibTv6HTwA02LPjard6bpFngTsfYw3ZKKU4PeJlionVo2hr5lL4lv0hjrE44NED5g");
@@ -390,7 +393,9 @@ const DropDownComponent = () => {
         formdata.append("calendar_event[start_at]", "2022-11-22T10:15:00Z");
         formdata.append("calendar_event[end_at]", "2022-11-22T11:45:00Z");
 
-        let JSONData = JSON.stringify(formdata)
+        let JSONData = JSON.stringify(bodyFormData)
+
+        console.log(JSONData)
 /*
         const requestOptions = {
             method: 'POST',
@@ -418,19 +423,59 @@ const DropDownComponent = () => {
             "title": "API Test!",
         };
 
-        const requestOptions = {
+
+        const jsonArray = []
+
+        saveData.forEach((item) => {
+            const json ={
+                "contextCode": "user_126754",
+                "startAt": item.startTime,
+                "endAt": item.endTime,
+                "title": item.title,
+            };
+            jsonArray.push(json)
+        });
+
+        /*const object = {};
+        formdata.forEach((value, key) => {
+            // Reflect.has in favor of: object.hasOwnProperty(key)
+            if(!Reflect.has(object, key)){
+                object[key] = value;
+                return;
+            }
+            if(!Array.isArray(object[key])){
+                object[key] = [object[key]];
+            }
+            object[key].push(value);
+        });
+        const json = JSON.stringify(object);*/
+
+        jsonArray.forEach((item) => {
+            const requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: JSON.stringify(item),
+                redirect: 'follow'
+            };
+            fetch("http://localhost:8080/apiproxy/test", requestOptions)
+                .then(response => response.text())
+                .then(result => console.log(result))
+                .catch(error => console.log('error', error));
+
+        });
+
+        /*const requestOptions = {
             method: 'POST',
             headers: myHeaders,
-            body: JSON.stringify(raw),
+            body: JSON.stringify(jsonArray),
             redirect: 'follow'
-        };
+        };*/
 
-        fetch("http://localhost:8080/apiproxy/test", requestOptions)
+       /* fetch("http://localhost:8080/apiproxy/test", requestOptions)
             .then(response => response.text())
             .then(result => console.log(result))
             .catch(error => console.log('error', error));
-
-        console.log(raw)
+*/
 
        /* const rawNew = raw.slice(1,raw.length-1);
         console.log(rawNew);
