@@ -186,19 +186,6 @@ const DropDownComponent = () => {
         
     }
 
-    useEffect(() => {
-        const handleOutsideClick = (event) => {
-            if (inputRef.current && !inputRef.current.contains(event.target)) {
-                setIsDatePickerOpen(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleOutsideClick);
-
-        return () => {
-            document.removeEventListener('mousedown', handleOutsideClick);
-        };
-    }, [inputRef]);
 
     return (
         <div>
