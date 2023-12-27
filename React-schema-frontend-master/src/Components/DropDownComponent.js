@@ -92,8 +92,9 @@ const DropDownComponent = () => {
             console.log(reservationDate)
 
             for(let j = 0; j < canvasLista.length; j++){
-                console.log(canvasLista[j].start_at)
-                if(canvasLista[j].start_at === reservationDate){
+                let date = new Date(canvasLista[j].start_at).toISOString()
+                console.log(date)
+                if(date === reservationDate){
                     listItem["uploadStatus"] = "Uppladdad";
                     break;
                 }else{
