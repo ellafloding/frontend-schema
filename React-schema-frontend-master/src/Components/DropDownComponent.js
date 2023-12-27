@@ -13,8 +13,9 @@ const DropDownComponent = () => {
     const [meetingLink, setMeetingLink] = useState('');
     const inputRef = useRef(null);
 
+    const [activityArray, setActivityArray] = useState([])
     const [aktivitetsLista, setAktivitetslista] = useState([]);
-
+    const [canvasLista, setCanvasLista] = useState([]);
 
     React.useEffect(() => {
         // Fetch kurskod options on component mount
@@ -28,10 +29,34 @@ const DropDownComponent = () => {
             });
     }, []);
 
+    React.useEffect(() => {
+        // Fetch kurskod options on component mount
+        axios.get('http://localhost:8080/apiproxy/canvasget')
+            .then(response => {
+                setCanvasLista(response.data);
+                console.log("canvasLista" + canvasLista)
+                console.log(canvasLista)
+            })
+            .catch(error => {
+                console.error('Error fetching kurskod options', error);
+            });
+    }, []);
 
     let javascriptList ={}
 
     const omdomeStudentFunction = () => {
+
+
+        axios.get('http://localhost:8080/apiproxy/canvasget')
+            .then(response => {
+                console.log(response)
+                setCanvasLista(response.data);
+                console.log("canvasLista" + canvasLista)
+                console.log(canvasLista)
+            })
+            .catch(error => {
+                console.error('Error fetching kurskod options', error);
+            });
 
         // Extract column headers from the API response
         const columnHeaders = [aktivitetsLista.columnheaders];
@@ -55,6 +80,26 @@ const DropDownComponent = () => {
             listItem["enddate"] = reservation.enddate;
             listItem["endtime"] = reservation.endtime;
 
+            let yearStart = reservation.startdate.toString().split('-').slice(0,1)
+            let monthStart = reservation.startdate.toString().split('-').slice(1,2)
+            let dayStart = reservation.startdate.toString().split('-').slice(2,3)
+
+            let startHour = reservation.starttime.toString().split(':').slice(0,1)
+            let startMinute = reservation.starttime.toString().split(':').slice(1,2)
+            let startMillisecond = "00"
+
+           let reservationDate = new Date(yearStart, monthStart-1, dayStart, startHour, startMinute).toISOString()
+            console.log(reservationDate)
+
+            for(let j = 0; j < canvasLista.length; j++){
+                console.log(canvasLista[j].start_at)
+                if(canvasLista[j].start_at === reservationDate){
+                    listItem["uploadStatus"] = "Uppladdad";
+                    break;
+                }else{
+                    listItem["uploadStatus"] = "Inte uppladdad";
+                }
+            }
             return listItem;
         });
 
@@ -62,8 +107,6 @@ const DropDownComponent = () => {
         console.log(javascriptList)
 
     };
-
-
 
     let isAllChecked = false
 
@@ -82,12 +125,15 @@ const DropDownComponent = () => {
 
         isAllChecked = !isAllChecked;
     }
+
     function windowPop(){
         alert("Betygen är skickade till Ladok")
 
     }
-    let saveData = []
 
+
+    let saveData = []
+    let uploaded = [];
     const handleSave = () => {
         for(let i = 0; i<combinedLista.length; i++){
 
@@ -128,14 +174,28 @@ const DropDownComponent = () => {
                 console.log(dateStart)
 
 
-                const entry = {
-                    title: activity,
+                    const entry = {
+                        id: combinedLista[i].id,
+                        title: activity,
+                        startTime: dateStart,
+                        endTime: dateEnd,
+                        location: location,
+                        description: meetingLink,
+                        uploadStatus: combinedLista[i].uploadStatus
+                    }
+                    saveData.push(entry);
+
+                uploaded.push(i)
+                console.log(uploaded)
+
+               /* const entry = {
+                    title: activityArray[],
                     startTime: dateStart,
                     endTime: dateEnd,
                     location: location,
                     description: meetingLink,
                 }
-                saveData.push(entry);
+                saveData.push(entry);*/
 
                 console.log(saveData)
             }
@@ -183,7 +243,17 @@ const DropDownComponent = () => {
 
         });
 
-        
+
+    }
+
+    let arr = [];
+    const activityArr = (act) => {
+
+        arr.push(act)
+
+        setActivityArray(arr)
+        console.log(arr)
+        console.log(activityArray)
     }
 
 
@@ -213,30 +283,51 @@ const DropDownComponent = () => {
                 <th>Sluttid</th>
                 <th>Plats, Lokal</th>
                 <th>Möteslänk</th>
+                <th>Status</th>
 
             </tr>
             </thead>
             <tbody>
             {combinedLista.map((item, index) => (
                 <tr key={index}>
-                    <td>
-                        <input
-                            type="checkbox"
-                            name="cb"
-                            checked={item.selected} // assuming your data has a property to track selection
-                            onChange={() => handleCheckboxChange(index)}
-                        />
-                    </td>
-                    <td> <input defaultValue={item.activity} onChange={(e) => setActivity(e.target.value)}>
-                    </input> </td>
+
+                    {canvasLista.includes(item.startdate) ?
+                        <td>
+                            <input
+                                type="checkbox"
+                                name="cb"
+                                disabled={true}
+                            />
+                        </td> :
+                        <td>
+                            <input
+                                type="checkbox"
+                                name="cb"
+                                checked={item.selected} // assuming your data has a property to track selection
+                                onChange={() => handleCheckboxChange(index)}
+                            />
+                        </td>}
+
+                    {item.uploadStatus === 'Inte uppladdad' ?
+                        <td><input defaultValue={item.activity} onChange={(e) => setActivity(e.target.value)}>
+                        </input></td>
+                        :
+                        <td><input defaultValue={item.activity} disabled={true}/></td>}
                     <td>{item.startdate}</td>
                     <td>{item.starttime}</td>
                     <td>{item.enddate}</td>
                     <td>{item.endtime}</td>
+                    {item.uploadStatus === 'Inte uppladdad' ?
                     <td> <input defaultValue={item.location} onChange={(e) => setLocation(e.target.value)}>
-                    </input></td>
+                    </input></td>:
+                        <td><input defaultValue={item.location} disabled={true}/></td>}
+
+                    {item.uploadStatus === 'Inte uppladdad' ?
                     <td><input defaultValue={item.meetingLink} onChange={(e) => setMeetingLink(e.target.value)}>
-                    </input></td>
+                    </input></td>:
+                    <td> <input defaultValue={item.meetingLink} disabled={true}/> </td>}
+
+                    <td>{item.uploadStatus}</td>
 
 
                 </tr>
