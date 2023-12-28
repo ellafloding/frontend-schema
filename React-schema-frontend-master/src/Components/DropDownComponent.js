@@ -128,7 +128,7 @@ const DropDownComponent = () => {
     }
 
     function windowPop(){
-        alert("Betygen är skickade till Ladok")
+        alert("Aktiviteterna har lagts till i Canvas!")
 
     }
 
@@ -200,6 +200,7 @@ const DropDownComponent = () => {
 
                 console.log(saveData)
             }
+
         }
 
 
@@ -245,6 +246,7 @@ const DropDownComponent = () => {
         });
 
 
+        windowPop()
     }
 
     let arr = [];
@@ -292,14 +294,7 @@ const DropDownComponent = () => {
             {combinedLista.map((item, index) => (
                 <tr key={index}>
 
-                    {canvasLista.includes(item.startdate) ?
-                        <td>
-                            <input
-                                type="checkbox"
-                                name="cb"
-                                disabled={true}
-                            />
-                        </td> :
+                    {item.uploadStatus === 'Inte uppladdad' ?
                         <td>
                             <input
                                 type="checkbox"
@@ -307,8 +302,14 @@ const DropDownComponent = () => {
                                 checked={item.selected} // assuming your data has a property to track selection
                                 onChange={() => handleCheckboxChange(index)}
                             />
+                        </td>:
+                        <td>
+                            <input
+                                type="checkbox"
+                                name="cb"
+                                disabled={true}
+                            />
                         </td>}
-
                     {item.uploadStatus === 'Inte uppladdad' ?
                         <td><input defaultValue={item.activity} onChange={(e) => setActivity(e.target.value)}>
                         </input></td>
