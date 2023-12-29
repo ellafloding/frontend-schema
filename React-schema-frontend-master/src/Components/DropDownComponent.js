@@ -1,8 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-
+import React, { useState, useRef } from 'react';
 import 'react-datepicker/dist/react-datepicker.css';
-
-import DatePicker from "react-datepicker";
 import axios from "axios";
 
 const DropDownComponent = () => {
@@ -11,14 +8,12 @@ const DropDownComponent = () => {
     const [activity, setActivity] = useState('');
     const [location, setLocation] = useState('');
     const [meetingLink, setMeetingLink] = useState('');
-    const inputRef = useRef(null);
-
     const [activityArray, setActivityArray] = useState([])
     const [aktivitetsLista, setAktivitetslista] = useState([]);
     const [canvasLista, setCanvasLista] = useState([]);
 
     React.useEffect(() => {
-        // Fetch kurskod options on component mount
+        // Hämtar kalenderevent från Time Edit.
         axios.get('https://cloud.timeedit.net/ltu/web/schedule1/ri105656X45Z0XQ6Z36g1Y40y3036Y32107gQY6Q547520876YQ837.json')
             .then(response => {
                 setAktivitetslista(response.data);
@@ -30,7 +25,7 @@ const DropDownComponent = () => {
     }, []);
 
     React.useEffect(() => {
-        // Fetch kurskod options on component mount
+        // Hämtar kalenderevent från Canvas.
         axios.get('http://localhost:8080/apiproxy/canvasget')
             .then(response => {
                 setCanvasLista(response.data);
@@ -45,8 +40,7 @@ const DropDownComponent = () => {
     let javascriptList ={}
 
     const omdomeStudentFunction = () => {
-
-
+        // Hämtar updaterade kalenderevent från Canvas.
         axios.get('http://localhost:8080/apiproxy/canvasget')
             .then(response => {
                 console.log(response)
@@ -58,12 +52,13 @@ const DropDownComponent = () => {
                 console.error('Error fetching kurskod options', error);
             });
 
-        // Extract column headers from the API response
+        // Tar fram kolumnerna från API-svaret.
         const columnHeaders = [aktivitetsLista.columnheaders];
 
-// Extract reservations from the API response
+        // Tar fram reservationer från API-svaret.
         const reservations = aktivitetsLista.reservations;
 
+        //Lägger in API-svaret i en lista.
         javascriptList = reservations.map(function (reservation) {
             const listItem = {};
 
@@ -83,14 +78,12 @@ const DropDownComponent = () => {
             let yearStart = reservation.startdate.toString().split('-').slice(0,1)
             let monthStart = reservation.startdate.toString().split('-').slice(1,2)
             let dayStart = reservation.startdate.toString().split('-').slice(2,3)
-
             let startHour = reservation.starttime.toString().split(':').slice(0,1)
             let startMinute = reservation.starttime.toString().split(':').slice(1,2)
-            let startMillisecond = "00"
-
-           let reservationDate = new Date(yearStart, monthStart-1, dayStart, startHour, startMinute).toISOString()
+            let reservationDate = new Date(yearStart, monthStart-1, dayStart, startHour, startMinute).toISOString()
             console.log(reservationDate)
 
+            //Kollar om eventet är uppladdat på Canvas och sätter status.
             for(let j = 0; j < canvasLista.length; j++){
                 let date = new Date(canvasLista[j].start_at).toISOString()
                 console.log(date)
@@ -103,38 +96,36 @@ const DropDownComponent = () => {
             }
             return listItem;
         });
-
         setCombinedLista(javascriptList)
         console.log(javascriptList)
-
     };
 
     let isAllChecked = false
 
+    // Hanterar checkbox logiken.
     const handleCheckboxChange = (index) => {
-        // Handle checkbox change logic, update the selected state in your data
         const updatedData = [...combinedLista];
         updatedData[index].selected = !updatedData[index].selected;
         setCombinedLista(updatedData);
     };
 
+    //Hanterar checkbox logiken.
     const toggleCheckboxes = (cn) => {
         var cbarray = document.getElementsByName(cn);
         for(var i = 0; i < cbarray.length; i++){
             cbarray[i].checked = !isAllChecked
         }
-
         isAllChecked = !isAllChecked;
     }
 
     function windowPop(){
-        alert("Betygen är skickade till Ladok")
-
+        alert("Eventet är sparat i Canvas")
     }
-
 
     let saveData = []
     let uploaded = [];
+
+    //Hanterar uppladdningen till Canvas.
     const handleSave = () => {
         for(let i = 0; i<combinedLista.length; i++){
 
@@ -168,12 +159,10 @@ const DropDownComponent = () => {
                 console.log(endMinute)
                 let endMillisecond = "00"
 
-                //Kanske är något fel med datum formatet
                 let dateStart = new Date(yearStart,monthStart-1,dayStart, startHour, startMinute, startMillisecond).toLocaleString()
                 let dateEnd = new Date(yearEnd, monthEnd-1, dayEnd, endHour, endMinute, endMillisecond).toLocaleString()
                 console.log(dateEnd)
                 console.log(dateStart)
-
 
                     const entry = {
                         id: combinedLista[i].id,
@@ -188,38 +177,19 @@ const DropDownComponent = () => {
 
                 uploaded.push(i)
                 console.log(uploaded)
-
-               /* const entry = {
-                    title: activityArray[],
-                    startTime: dateStart,
-                    endTime: dateEnd,
-                    location: location,
-                    description: meetingLink,
-                }
-                saveData.push(entry);*/
-
                 console.log(saveData)
             }
         }
 
-
-
+        // Headers för POST.
         const myHeaders = new Headers();
         myHeaders.append("Content-Type", "application/json");
 
-        const raw ={
-            "contextCode": "user_126754",
-            "startAt": "2022-11-25T10:15:00Z",
-            "endAt": "2022-11-25T11:45:00Z",
-            "title": "API Test!",
-        };
-
-
         const jsonArray = []
-
+        // Gör om datan till Json och lägger i en array.
         saveData.forEach((item) => {
             const json ={
-                "contextCode": "user_126754",
+                "contextCode": "user_126753",
                 "startAt": item.startTime,
                 "endAt": item.endTime,
                 "title": item.title,
@@ -229,34 +199,24 @@ const DropDownComponent = () => {
             jsonArray.push(json)
         });
 
-
-        jsonArray.forEach((item) => {
+        //Laddar upp alla entries i arrayen till Canvas.
+        jsonArray.forEach(async (item) => {
             const requestOptions = {
                 method: 'POST',
                 headers: myHeaders,
-                body: JSON.stringify(item),
+                body: JSON.stringify(JSON.parse(JSON.stringify(item))),
                 redirect: 'follow'
             };
-            fetch("http://localhost:8080/apiproxy/test", requestOptions)
-                .then(response => response.text())
-                .then(result => console.log(result))
-                .catch(error => console.log('error', error));
 
+            try {
+                const response = await fetch("http://localhost:8080/apiproxy/test", requestOptions);
+                const result = await response.text();
+                console.log(result);
+            } catch (error) {
+                console.log('error', error);
+            }
         });
-
-
     }
-
-    let arr = [];
-    const activityArr = (act) => {
-
-        arr.push(act)
-
-        setActivityArray(arr)
-        console.log(arr)
-        console.log(activityArray)
-    }
-
 
     return (
         <div>
@@ -273,7 +233,7 @@ const DropDownComponent = () => {
                     <input
                         type="checkbox"
                         name = "maincb"
-                        checked={isAllChecked} // assuming your data has a property to track selection
+                        checked={isAllChecked}
                         onChange={() => toggleCheckboxes('cb')}
                     />
                 </th>
@@ -289,9 +249,8 @@ const DropDownComponent = () => {
             </tr>
             </thead>
             <tbody>
-            {combinedLista.map((item, index) => (
+                {combinedLista.map((item, index) => (
                 <tr key={index}>
-
                     {canvasLista.includes(item.startdate) ?
                         <td>
                             <input
@@ -304,7 +263,7 @@ const DropDownComponent = () => {
                             <input
                                 type="checkbox"
                                 name="cb"
-                                checked={item.selected} // assuming your data has a property to track selection
+                                checked={item.selected}
                                 onChange={() => handleCheckboxChange(index)}
                             />
                         </td>}
@@ -327,17 +286,12 @@ const DropDownComponent = () => {
                     <td><input defaultValue={item.meetingLink} onChange={(e) => setMeetingLink(e.target.value)}>
                     </input></td>:
                     <td> <input defaultValue={item.meetingLink} disabled={true}/> </td>}
-
                     <td>{item.uploadStatus}</td>
-
-
                 </tr>
             ))}
             </tbody>
         </table>
         </div>
-
-
         </div>
     );
 };
