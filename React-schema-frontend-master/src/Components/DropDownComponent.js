@@ -119,7 +119,7 @@ const DropDownComponent = () => {
     }
 
     function windowPop(){
-        alert("Eventet är sparat i Canvas")
+        alert("Aktiviteterna har lagts till i Canvas!")
     }
 
     let saveData = []
@@ -179,6 +179,7 @@ const DropDownComponent = () => {
                 console.log(uploaded)
                 console.log(saveData)
             }
+
         }
 
         // Headers för POST.
@@ -216,6 +217,8 @@ const DropDownComponent = () => {
                 console.log('error', error);
             }
         });
+
+        windowPop()
     }
 
     return (
@@ -251,23 +254,24 @@ const DropDownComponent = () => {
             <tbody>
                 {combinedLista.map((item, index) => (
                 <tr key={index}>
-                    {canvasLista.includes(item.startdate) ?
+
+                    {item.uploadStatus === 'Inte uppladdad' ?
+
+                        <td>
+                            <input
+                                type="checkbox"
+                                name="cb"
+                                checked={item.selected} // assuming your data has a property to track selection
+                                onChange={() => handleCheckboxChange(index)}
+                            />
+                        </td>:
                         <td>
                             <input
                                 type="checkbox"
                                 name="cb"
                                 disabled={true}
                             />
-                        </td> :
-                        <td>
-                            <input
-                                type="checkbox"
-                                name="cb"
-                                checked={item.selected}
-                                onChange={() => handleCheckboxChange(index)}
-                            />
                         </td>}
-
                     {item.uploadStatus === 'Inte uppladdad' ?
                         <td><input defaultValue={item.activity} onChange={(e) => setActivity(e.target.value)}>
                         </input></td>
