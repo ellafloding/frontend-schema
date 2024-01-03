@@ -127,6 +127,17 @@ const DropDownComponent = () => {
 
     //Hanterar uppladdningen till Canvas.
     const handleSave = () => {
+        combinedLista.forEach((row) => {
+            // Check if the row is in edit mode before saving
+            if (row.isEditing) {
+                // Save the changes locally
+                const updatedData = combinedLista.map((r) =>
+                    r.id === row.id ? { ...r, isEditing: false } : r
+                );
+                setCombinedLista(updatedData);
+            }
+        });
+
         for(let i = 0; i<combinedLista.length; i++){
 
             if(combinedLista[i].selected === true){
@@ -166,11 +177,11 @@ const DropDownComponent = () => {
 
                     const entry = {
                         id: combinedLista[i].id,
-                        title: activity,
+                        title: combinedLista[i].activity,
                         startTime: dateStart,
                         endTime: dateEnd,
-                        location: location,
-                        description: meetingLink,
+                        location: combinedLista[i].location,
+                        description: combinedLista[i].meetingLink,
                         uploadStatus: combinedLista[i].uploadStatus
                     }
                     saveData.push(entry);
@@ -190,7 +201,7 @@ const DropDownComponent = () => {
         // Gör om datan till Json och lägger i en array.
         saveData.forEach((item) => {
             const json ={
-                "contextCode": "user_126753",
+                "contextCode": "user_126754",
                 "startAt": item.startTime,
                 "endAt": item.endTime,
                 "title": item.title,
@@ -221,83 +232,129 @@ const DropDownComponent = () => {
         windowPop()
     }
 
-    return (
+
+
+        const handleEdit = (id) => {
+            // Set the edit mode for the specified row
+            // You may need to create a copy of the data to avoid mutating the state directly
+            const updatedData = combinedLista.map((row) =>
+                row.id === id ? { ...row, isEditing: true } : row
+            );
+            setCombinedLista(updatedData);
+        };
+
+        const handleInputChange = (id, field, value) => {
+            const updatedData = combinedLista.map((item) =>
+                item.id === id ? { ...item, [field]: value } : item
+            );
+            setCombinedLista(updatedData);
+        };
+
+        const save = (id) => {
+            // Save the changes locally
+            const updatedData = combinedLista.map((row) =>
+                row.id === id ? { ...row, isEditing: false } : row
+            );
+            setCombinedLista(updatedData);
+
+        };
+
+        return (
         <div>
             <input></input>
             <button onClick={omdomeStudentFunction}>Sök</button>
             <button className="save-button" type="button" onClick={handleSave}>
-                Spara
+                Överför till Canvas
             </button>
-        <div>
-        <table>
-            <thead>
-            <tr>
-                <th>
-                    <input
-                        type="checkbox"
-                        name = "maincb"
-                        checked={isAllChecked}
-                        onChange={() => toggleCheckboxes('cb')}
-                    />
-                </th>
-                <th>Aktivitet</th>
-                <th>Startdatum</th>
-                <th>Starttid</th>
-                <th>Slutdatum</th>
-                <th>Sluttid</th>
-                <th>Plats, Lokal</th>
-                <th>Möteslänk</th>
-                <th>Status</th>
-
-            </tr>
-            </thead>
-            <tbody>
-                {combinedLista.map((item, index) => (
-                <tr key={index}>
-
-                    {item.uploadStatus === 'Inte uppladdad' ?
-
-                        <td>
+            <div>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>
                             <input
                                 type="checkbox"
-                                name="cb"
-                                checked={item.selected} // assuming your data has a property to track selection
-                                onChange={() => handleCheckboxChange(index)}
+                                name="maincb"
+                                checked={isAllChecked}
+                                onChange={() => toggleCheckboxes('cb')}
                             />
-                        </td>:
-                        <td>
-                            <input
-                                type="checkbox"
-                                name="cb"
-                                disabled={true}
-                            />
-                        </td>}
-                    {item.uploadStatus === 'Inte uppladdad' ?
-                        <td><input defaultValue={item.activity} onChange={(e) => setActivity(e.target.value)}>
-                        </input></td>
-                        :
-                        <td><input defaultValue={item.activity} disabled={true}/></td>}
-                    <td>{item.startdate}</td>
-                    <td>{item.starttime}</td>
-                    <td>{item.enddate}</td>
-                    <td>{item.endtime}</td>
-                    {item.uploadStatus === 'Inte uppladdad' ?
-                    <td> <input defaultValue={item.location} onChange={(e) => setLocation(e.target.value)}>
-                    </input></td>:
-                        <td><input defaultValue={item.location} disabled={true}/></td>}
+                        </th>
+                        <th>Aktivitet</th>
+                        <th>Startdatum</th>
+                        <th>Starttid</th>
+                        <th>Slutdatum</th>
+                        <th>Sluttid</th>
+                        <th>Plats, Lokal</th>
+                        <th>Möteslänk</th>
+                        <th>Status</th>
 
-                    {item.uploadStatus === 'Inte uppladdad' ?
-                    <td><input defaultValue={item.meetingLink} onChange={(e) => setMeetingLink(e.target.value)}>
-                    </input></td>:
-                    <td> <input defaultValue={item.meetingLink} disabled={true}/> </td>}
-                    <td>{item.uploadStatus}</td>
-                </tr>
-            ))}
-            </tbody>
-        </table>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {combinedLista.map((item, index) => (
+                        <tr key={item.id}>
+
+                            {item.uploadStatus === 'Inte uppladdad' ?
+
+                                <td>
+                                    <input
+                                        type="checkbox"
+                                        name="cb"
+                                        checked={item.selected} // assuming your data has a property to track selection
+                                        onChange={() => handleCheckboxChange(index)}
+                                    />
+                                </td> :
+                                <td>
+                                    <input
+                                        type="checkbox"
+                                        name="cb"
+                                        disabled={true}
+                                    />
+                                </td>}
+                            {item.isEditing ?
+                                <td><input defaultValue={item.activity}
+                                           onChange={(e) => handleInputChange(item.id, 'activity', e.target.value)}>
+                                </input></td>
+                                :
+                                <td><input defaultValue={item.activity} disabled={true}/></td>}
+                            <td>{item.startdate}</td>
+                            <td>{item.starttime}</td>
+                            <td>{item.enddate}</td>
+                            <td>{item.endtime}</td>
+                            {item.isEditing ?
+                                <td><input defaultValue={item.location}
+                                           onChange={(e) => handleInputChange(item.id, 'location', e.target.value)}>
+                                </input></td> :
+                                <td><input defaultValue={item.location} disabled={true}/></td>}
+
+                            {item.isEditing ?
+                                <td><input defaultValue={item.meetingLink}
+                                           onChange={(e) => handleInputChange(item.id, 'meetingLink', e.target.value)}>
+                                </input></td> :
+                                <td><input defaultValue={item.meetingLink} disabled={true}/></td>}
+                            <td>{item.uploadStatus}</td>
+                            <td>
+                                {item.uploadStatus === 'Inte uppladdad' ?
+                                    <button onClick={() => handleEdit(item.id)}>Redigera</button> :
+                                    <button onClick={() => handleEdit(item.id)} disabled={true}>Redigera</button>
+                                }
+                            </td>
+
+                            <td>
+                                {item.uploadStatus === 'Inte uppladdad' ?
+                                    <button onClick={() => save(item.id)}>Spara rad</button> :
+                                    <button onClick={() => save(item.id)} disabled={true}>Spara rad</button>
+                                }
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
-        </div>
+
     );
-};
 
-export default DropDownComponent;
+}
+    ;
+
+    export default DropDownComponent;
